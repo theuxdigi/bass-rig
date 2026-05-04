@@ -1,0 +1,451 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background: transparent; }
+  :root {
+    --amber-50: #FAEEDA; --amber-100: #FAC775; --amber-400: #BA7517; --amber-800: #633806; --amber-900: #412402;
+    --teal-50: #E1F5EE; --teal-600: #0F6E56; --teal-800: #085041;
+    --gray-50: #F1EFE8; --gray-100: #D3D1C7; --gray-400: #888780; --gray-800: #444441;
+    --coral-50: #FAECE7; --coral-600: #993C1D; --coral-800: #712B13;
+    --purple-50: #EEEDFE; --purple-600: #534AB7; --purple-800: #3C3489;
+  }
+  .app { max-width: 400px; margin: 0 auto; padding: 0 0 80px; min-height: 100vh; }
+
+  /* NAV */
+  .nav { display: flex; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 1rem; }
+  .nav-btn { flex: 1; padding: 10px 4px; font-size: 12px; font-weight: 500; color: var(--color-text-secondary); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+  .nav-btn.active { color: var(--amber-400); border-bottom-color: var(--amber-400); }
+
+  /* CARDS */
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: .75rem; }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
+  .card-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+  .card-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+
+  /* BADGE */
+  .badge { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 20px; }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-gray { background: var(--gray-50); color: var(--gray-800); }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: none; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--color-text-primary); transition: background .12s; }
+  .btn:hover { background: var(--color-background-secondary); }
+  .btn-primary { background: var(--amber-400); color: #fff; border-color: var(--amber-400); }
+  .btn-primary:hover { background: var(--amber-800); border-color: var(--amber-800); }
+  .btn-danger { color: var(--coral-600); border-color: transparent; }
+  .btn-danger:hover { background: var(--coral-50); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  /* FAB */
+  .fab { position: fixed; bottom: 20px; right: 20px; width: 52px; height: 52px; border-radius: 50%; background: var(--amber-400); color: #fff; border: none; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,.15); z-index: 100; }
+
+  /* CHAIN */
+  .chain-wrap { display: flex; flex-direction: column; gap: 6px; }
+  .chain-item { display: flex; align-items: center; gap: 10px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 8px 10px; }
+  .chain-num { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); min-width: 18px; }
+  .chain-name { font-size: 13px; font-weight: 500; flex: 1; color: var(--color-text-primary); }
+  .chain-arrow { font-size: 14px; color: var(--amber-400); text-align: center; }
+
+  /* KNOB GRID */
+  .knob-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 8px; }
+  .knob-item label { font-size: 11px; color: var(--color-text-secondary); display: block; margin-bottom: 2px; }
+  .knob-item input[type=range] { width: 100%; }
+  .knob-val { font-size: 12px; font-weight: 500; color: var(--color-text-primary); float: right; }
+
+  /* FORM */
+  .form-group { margin-bottom: 12px; }
+  .form-group label { font-size: 12px; color: var(--color-text-secondary); display: block; margin-bottom: 4px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; font-size: 14px; color: var(--color-text-primary); }
+  .form-group textarea { min-height: 60px; resize: vertical; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: flex-end; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--color-background-primary); border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0; padding: 1.25rem; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
+  .modal-title { font-size: 16px; font-weight: 500; margin-bottom: 1rem; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 1rem; }
+
+  /* SECTION LABEL */
+  .section-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .5px; margin: 1rem 0 .5rem; }
+
+  /* PRESET TABS */
+  .preset-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: .75rem; }
+  .preset-tab { padding: 4px 12px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); font-size: 12px; font-weight: 500; cursor: pointer; background: none; color: var(--color-text-secondary); transition: all .12s; }
+  .preset-tab.active { background: var(--amber-400); color: #fff; border-color: var(--amber-400); }
+
+  /* EMPTY */
+  .empty { text-align: center; padding: 2.5rem 1rem; color: var(--color-text-secondary); font-size: 14px; }
+  .empty-icon { font-size: 32px; margin-bottom: .5rem; }
+
+  /* SPEC ROW */
+  .spec-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .spec-row:last-child { border-bottom: none; }
+  .spec-label { color: var(--color-text-secondary); }
+  .spec-val { color: var(--color-text-primary); font-weight: 500; text-align: right; max-width: 55%; }
+
+  .tag { display: inline-block; background: var(--gray-50); color: var(--gray-800); font-size: 11px; padding: 2px 7px; border-radius: 10px; margin: 2px; }
+
+  .expandable { cursor: pointer; }
+  .expand-body { display: none; margin-top: 8px; }
+  .expand-body.open { display: block; }
+  .chevron { transition: transform .15s; display: inline-block; }
+  .chevron.open { transform: rotate(180deg); }
+</style>
+
+<div class="app" id="app">
+  <div style="padding: 1rem 1rem .5rem; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-size: 18px; font-weight: 500; color: var(--color-text-primary);">Bass Rig</div>
+      <div style="font-size: 12px; color: var(--color-text-secondary);">Rig documentation</div>
+    </div>
+    <div class="badge badge-amber" id="rig-count">0 basses</div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="switchTab('basses')">Basses</button>
+    <button class="nav-btn" onclick="switchTab('chain')">Signal chain</button>
+    <button class="nav-btn" onclick="switchTab('presets')">Presets</button>
+    <button class="nav-btn" onclick="switchTab('notes')">Notes</button>
+  </div>
+
+  <div id="tab-basses" class="tab-content" style="padding: 0 1rem;"></div>
+  <div id="tab-chain" class="tab-content" style="padding: 0 1rem; display:none;"></div>
+  <div id="tab-presets" class="tab-content" style="padding: 0 1rem; display:none;"></div>
+  <div id="tab-notes" class="tab-content" style="padding: 0 1rem; display:none;"></div>
+</div>
+
+<button class="fab" id="fab-btn" onclick="fabAction()">+</button>
+
+<!-- BASS MODAL -->
+<div class="modal-overlay" id="modal-bass">
+  <div class="modal">
+    <div class="modal-title" id="bass-modal-title">Add bass</div>
+    <div class="form-group"><label>Name / model</label><input id="b-name" placeholder="e.g. Fender Jazz Bass '72"></div>
+    <div class="form-group"><label>Brand</label><input id="b-brand" placeholder="Fender, Music Man, etc."></div>
+    <div class="form-group"><label>Year</label><input id="b-year" placeholder="e.g. 2019" type="number"></div>
+    <div class="form-group"><label>Pickups</label><input id="b-pickups" placeholder="e.g. J/J, P/J, Humbucker"></div>
+    <div class="form-group"><label>Strings</label><input id="b-strings" placeholder="e.g. D'Addario XL .045–.105"></div>
+    <div class="form-group"><label>Tuning</label><input id="b-tuning" placeholder="e.g. Standard EADG, Drop D"></div>
+    <div class="form-group"><label>Notes</label><textarea id="b-notes" placeholder="Setup, mods, feel..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveBass()">Save</button>
+      <button class="btn" onclick="closeModal('modal-bass')">Cancel</button>
+      <button class="btn btn-danger" id="btn-delete-bass" style="display:none" onclick="deleteBass()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- PEDAL MODAL -->
+<div class="modal-overlay" id="modal-pedal">
+  <div class="modal">
+    <div class="modal-title" id="pedal-modal-title">Add pedal</div>
+    <div class="form-group"><label>Pedal name</label><input id="p-name" placeholder="e.g. Source Audio Aftershock"></div>
+    <div class="form-group"><label>Type</label>
+      <select id="p-type">
+        <option>Compressor</option><option>Tuner</option><option>Overdrive</option><option>Fuzz</option><option>Distortion</option>
+        <option>EQ</option><option>Octaver</option><option>Filter / Envelope</option><option>Chorus</option><option>Flanger</option>
+        <option>Phaser</option><option>Delay</option><option>Reverb</option><option>Preamp / DI</option><option>Loop / Utility</option><option>Other</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Brand</label><input id="p-brand" placeholder="Boss, MXR, EHX..."></div>
+    <div class="form-group"><label>Controls (comma-separated)</label><input id="p-controls" placeholder="e.g. Volume, Tone, Drive, Mix"></div>
+    <div class="form-group"><label>Notes</label><textarea id="p-notes" placeholder="Typical use, signal path notes..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="savePedal()">Save</button>
+      <button class="btn" onclick="closeModal('modal-pedal')">Cancel</button>
+      <button class="btn btn-danger" id="btn-delete-pedal" style="display:none" onclick="deletePedal()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRESET MODAL -->
+<div class="modal-overlay" id="modal-preset">
+  <div class="modal">
+    <div class="modal-title" id="preset-modal-title">Add preset</div>
+    <div class="form-group"><label>Preset name</label><input id="pr-name" placeholder="e.g. Jazz Gig, Recording, Rehearsal"></div>
+    <div class="form-group"><label>Bass used</label><select id="pr-bass"></select></div>
+    <div class="form-group"><label>Genre / context</label><input id="pr-genre" placeholder="e.g. Jazz, Funk, Rock"></div>
+    <div id="pr-pedal-settings"></div>
+    <div class="form-group"><label>Notes</label><textarea id="pr-notes" placeholder="Tone goals, what this preset is for..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="savePreset()">Save</button>
+      <button class="btn" onclick="closeModal('modal-preset')">Cancel</button>
+      <button class="btn btn-danger" id="btn-delete-preset" style="display:none" onclick="deletePreset()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTES MODAL -->
+<div class="modal-overlay" id="modal-note">
+  <div class="modal">
+    <div class="modal-title">Rig notes</div>
+    <div class="form-group"><label>General rig notes</label><textarea id="global-notes" style="min-height:120px;" placeholder="Maintenance log, gig notes, shopping list..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveNotes()">Save</button>
+      <button class="btn" onclick="closeModal('modal-note')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let state = {
+  basses: [], pedals: [], presets: [], notes: '', editingBass: null, editingPedal: null, editingPreset: null
+};
+let currentTab = 'basses';
+
+function load() {
+  try {
+    const s = localStorage.getItem('bassrig');
+    if (s) state = { ...state, ...JSON.parse(s) };
+  } catch(e) {}
+  render();
+}
+
+function save() {
+  try { localStorage.setItem('bassrig', JSON.stringify({ basses: state.basses, pedals: state.pedals, presets: state.presets, notes: state.notes })); } catch(e) {}
+}
+
+function switchTab(t) {
+  currentTab = t;
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+  document.getElementById('tab-' + t).style.display = '';
+  document.querySelectorAll('.nav-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['basses','chain','presets','notes'][i] === t);
+  });
+  render();
+}
+
+function fabAction() {
+  if (currentTab === 'basses') openBassModal();
+  else if (currentTab === 'chain') openPedalModal();
+  else if (currentTab === 'presets') openPresetModal();
+  else if (currentTab === 'notes') openNoteModal();
+}
+
+// ---- RENDER ----
+function render() {
+  renderBasses(); renderChain(); renderPresets(); renderNotes();
+  document.getElementById('rig-count').textContent = state.basses.length + ' bass' + (state.basses.length !== 1 ? 'es' : '');
+}
+
+function renderBasses() {
+  const el = document.getElementById('tab-basses');
+  if (!state.basses.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🎸</div>No basses yet.<br>Tap + to add your first bass.</div>'; return; }
+  el.innerHTML = state.basses.map((b, i) => `
+    <div class="card">
+      <div class="card-header expandable" onclick="toggleExpand('bass-${i}')">
+        <div>
+          <div class="card-title">${b.name}</div>
+          <div class="card-sub">${b.brand || ''}${b.year ? ' · ' + b.year : ''}</div>
+        </div>
+        <span class="chevron" id="chev-bass-${i}">▾</span>
+      </div>
+      <div class="expand-body" id="bass-${i}">
+        ${b.pickups ? `<div class="spec-row"><span class="spec-label">Pickups</span><span class="spec-val">${b.pickups}</span></div>` : ''}
+        ${b.strings ? `<div class="spec-row"><span class="spec-label">Strings</span><span class="spec-val">${b.strings}</span></div>` : ''}
+        ${b.tuning ? `<div class="spec-row"><span class="spec-label">Tuning</span><span class="spec-val">${b.tuning}</span></div>` : ''}
+        ${b.notes ? `<div style="font-size:12px;color:var(--color-text-secondary);margin-top:8px;">${b.notes}</div>` : ''}
+        <div style="margin-top:10px;"><button class="btn btn-sm" onclick="editBass(${i})">Edit</button></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderChain() {
+  const el = document.getElementById('tab-chain');
+  if (!state.pedals.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🎛</div>No pedals yet.<br>Tap + to build your chain.</div>'; return; }
+  const typeColors = { Compressor:'badge-teal', Tuner:'badge-gray', Overdrive:'badge-amber', Fuzz:'badge-amber', Distortion:'badge-amber', EQ:'badge-gray', Octaver:'badge-teal', 'Filter / Envelope':'badge-teal', Chorus:'badge-teal', Flanger:'badge-teal', Phaser:'badge-teal', Delay:'badge-gray', Reverb:'badge-gray', 'Preamp / DI':'badge-amber', 'Loop / Utility':'badge-gray', Other:'badge-gray' };
+  el.innerHTML = '<div class="chain-wrap">' +
+    state.pedals.map((p, i) => `
+      <div>
+        <div class="chain-item expandable" onclick="toggleExpand('ped-${i}')">
+          <span class="chain-num">${i+1}</span>
+          <div style="flex:1">
+            <div class="chain-name">${p.name}</div>
+            <div style="margin-top:2px;"><span class="badge ${typeColors[p.type]||'badge-gray'}">${p.type}</span>${p.brand ? `<span style="font-size:11px;color:var(--color-text-secondary);margin-left:6px;">${p.brand}</span>` : ''}</div>
+          </div>
+          <span class="chevron" id="chev-ped-${i}">▾</span>
+        </div>
+        <div class="expand-body" id="ped-${i}" style="padding:0 8px;">
+          ${p.controls ? `<div style="font-size:12px;color:var(--color-text-secondary);margin:.5rem 0 .25rem;">Controls:</div><div>${p.controls.split(',').map(c=>`<span class="tag">${c.trim()}</span>`).join('')}</div>` : ''}
+          ${p.notes ? `<div style="font-size:12px;color:var(--color-text-secondary);margin-top:8px;">${p.notes}</div>` : ''}
+          <div style="display:flex;gap:6px;margin-top:10px;">
+            <button class="btn btn-sm" onclick="editPedal(${i})">Edit</button>
+            ${i>0?`<button class="btn btn-sm" onclick="movePedal(${i},-1)">↑</button>`:''}
+            ${i<state.pedals.length-1?`<button class="btn btn-sm" onclick="movePedal(${i},1)">↓</button>`:''}
+          </div>
+        </div>
+        ${i < state.pedals.length-1 ? '<div class="chain-arrow">↓</div>' : ''}
+      </div>`).join('') +
+    `<div class="chain-item" style="background:none;border:0.5px dashed var(--color-border-secondary);justify-content:center;"><span style="font-size:12px;color:var(--color-text-secondary);">→ Amp / DI</span></div>` +
+    '</div>';
+}
+
+function renderPresets() {
+  const el = document.getElementById('tab-presets');
+  if (!state.presets.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🎚</div>No presets yet.<br>Tap + to save a setup.</div>'; return; }
+  el.innerHTML = state.presets.map((pr, i) => `
+    <div class="card">
+      <div class="card-header expandable" onclick="toggleExpand('pr-${i}')">
+        <div>
+          <div class="card-title">${pr.name}</div>
+          <div class="card-sub">${pr.bassName || ''}${pr.genre ? ' · ' + pr.genre : ''}</div>
+        </div>
+        <span class="chevron" id="chev-pr-${i}">▾</span>
+      </div>
+      <div class="expand-body" id="pr-${i}">
+        ${pr.settings && pr.settings.length ? pr.settings.map(s => `
+          <div style="margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px;">${s.pedalName}</div>
+            ${s.knobs.map(k => `
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+                <span style="font-size:12px;color:var(--color-text-secondary);min-width:60px;">${k.name}</span>
+                <div style="flex:1;height:4px;background:var(--color-border-tertiary);border-radius:2px;position:relative;">
+                  <div style="height:4px;background:var(--amber-400);border-radius:2px;width:${k.val}%"></div>
+                </div>
+                <span style="font-size:12px;font-weight:500;min-width:28px;text-align:right;">${k.val}%</span>
+              </div>`).join('')}
+          </div>`).join('<hr style="border:none;border-top:0.5px solid var(--color-border-tertiary);margin:8px 0;">') : ''}
+        ${pr.notes ? `<div style="font-size:12px;color:var(--color-text-secondary);margin-top:8px;">${pr.notes}</div>` : ''}
+        <div style="margin-top:10px;"><button class="btn btn-sm" onclick="editPreset(${i})">Edit</button></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderNotes() {
+  const el = document.getElementById('tab-notes');
+  el.innerHTML = `<div class="card">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;">General rig notes</div>
+    ${state.notes ? `<div style="font-size:14px;color:var(--color-text-primary);white-space:pre-wrap;">${state.notes}</div>` : '<div style="font-size:13px;color:var(--color-text-secondary)">No notes yet.</div>'}
+    <div style="margin-top:12px;"><button class="btn btn-sm" onclick="openNoteModal()">Edit notes</button></div>
+  </div>`;
+}
+
+function toggleExpand(id) {
+  const el = document.getElementById(id);
+  const chev = document.getElementById('chev-' + id);
+  el.classList.toggle('open');
+  if (chev) chev.classList.toggle('open');
+}
+
+// ---- BASS ----
+function openBassModal(b, i) {
+  state.editingBass = i !== undefined ? i : null;
+  document.getElementById('bass-modal-title').textContent = b ? 'Edit bass' : 'Add bass';
+  document.getElementById('b-name').value = b ? b.name : '';
+  document.getElementById('b-brand').value = b ? b.brand : '';
+  document.getElementById('b-year').value = b ? b.year : '';
+  document.getElementById('b-pickups').value = b ? b.pickups : '';
+  document.getElementById('b-strings').value = b ? b.strings : '';
+  document.getElementById('b-tuning').value = b ? b.tuning : '';
+  document.getElementById('b-notes').value = b ? b.notes : '';
+  document.getElementById('btn-delete-bass').style.display = b ? '' : 'none';
+  openModal('modal-bass');
+}
+function editBass(i) { openBassModal(state.basses[i], i); }
+function saveBass() {
+  const nm = document.getElementById('b-name').value.trim();
+  if (!nm) return;
+  const obj = { name: nm, brand: document.getElementById('b-brand').value.trim(), year: document.getElementById('b-year').value.trim(), pickups: document.getElementById('b-pickups').value.trim(), strings: document.getElementById('b-strings').value.trim(), tuning: document.getElementById('b-tuning').value.trim(), notes: document.getElementById('b-notes').value.trim() };
+  if (state.editingBass !== null) state.basses[state.editingBass] = obj; else state.basses.push(obj);
+  save(); closeModal('modal-bass'); render();
+}
+function deleteBass() {
+  if (state.editingBass !== null) { state.basses.splice(state.editingBass, 1); save(); closeModal('modal-bass'); render(); }
+}
+
+// ---- PEDAL ----
+function openPedalModal(p, i) {
+  state.editingPedal = i !== undefined ? i : null;
+  document.getElementById('pedal-modal-title').textContent = p ? 'Edit pedal' : 'Add pedal';
+  document.getElementById('p-name').value = p ? p.name : '';
+  document.getElementById('p-type').value = p ? p.type : 'Compressor';
+  document.getElementById('p-brand').value = p ? p.brand : '';
+  document.getElementById('p-controls').value = p ? p.controls : '';
+  document.getElementById('p-notes').value = p ? p.notes : '';
+  document.getElementById('btn-delete-pedal').style.display = p ? '' : 'none';
+  openModal('modal-pedal');
+}
+function editPedal(i) { openPedalModal(state.pedals[i], i); }
+function savePedal() {
+  const nm = document.getElementById('p-name').value.trim();
+  if (!nm) return;
+  const obj = { name: nm, type: document.getElementById('p-type').value, brand: document.getElementById('p-brand').value.trim(), controls: document.getElementById('p-controls').value.trim(), notes: document.getElementById('p-notes').value.trim() };
+  if (state.editingPedal !== null) state.pedals[state.editingPedal] = obj; else state.pedals.push(obj);
+  save(); closeModal('modal-pedal'); render();
+}
+function deletePedal() {
+  if (state.editingPedal !== null) { state.pedals.splice(state.editingPedal, 1); save(); closeModal('modal-pedal'); render(); }
+}
+function movePedal(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= state.pedals.length) return;
+  [state.pedals[i], state.pedals[j]] = [state.pedals[j], state.pedals[i]];
+  save(); render();
+}
+
+// ---- PRESET ----
+function openPresetModal(pr, i) {
+  state.editingPreset = i !== undefined ? i : null;
+  document.getElementById('preset-modal-title').textContent = pr ? 'Edit preset' : 'Add preset';
+  document.getElementById('pr-name').value = pr ? pr.name : '';
+  document.getElementById('pr-genre').value = pr ? pr.genre : '';
+  document.getElementById('pr-notes').value = pr ? pr.notes : '';
+  const bassEl = document.getElementById('pr-bass');
+  bassEl.innerHTML = state.basses.map((b,bi) => `<option value="${bi}">${b.name}</option>`).join('') || '<option value="">— no basses —</option>';
+  if (pr) { const idx = state.basses.findIndex(b => b.name === pr.bassName); bassEl.value = idx >= 0 ? idx : 0; }
+  buildPresetKnobs(pr);
+  document.getElementById('btn-delete-preset').style.display = pr ? '' : 'none';
+  openModal('modal-preset');
+}
+function buildPresetKnobs(pr) {
+  const wrap = document.getElementById('pr-pedal-settings');
+  if (!state.pedals.length) { wrap.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);">Add pedals in the Signal chain tab first.</div>'; return; }
+  wrap.innerHTML = '<div class="section-label">Pedal settings</div>' + state.pedals.map((p, pi) => {
+    const existing = pr && pr.settings ? pr.settings.find(s => s.pedalName === p.name) : null;
+    const controls = p.controls ? p.controls.split(',').map(c=>c.trim()).filter(Boolean) : ['Level'];
+    return `<div class="card" style="margin-bottom:8px;">
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px;">${p.name} <span class="badge badge-gray">${p.type}</span></div>
+      ${controls.map((c, ci) => {
+        const k = existing && existing.knobs ? existing.knobs.find(k => k.name === c) : null;
+        const val = k ? k.val : 50;
+        return `<div style="margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-text-secondary);margin-bottom:2px;"><span>${c}</span><span id="kv-${pi}-${ci}">${val}%</span></div>
+          <input type="range" min="0" max="100" step="1" value="${val}" data-pi="${pi}" data-ci="${ci}" oninput="document.getElementById('kv-${pi}-${ci}').textContent=this.value+'%'">
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+function editPreset(i) { openPresetModal(state.presets[i], i); }
+function savePreset() {
+  const nm = document.getElementById('pr-name').value.trim();
+  if (!nm) return;
+  const bIdx = parseInt(document.getElementById('pr-bass').value);
+  const settings = state.pedals.map((p, pi) => {
+    const controls = p.controls ? p.controls.split(',').map(c=>c.trim()).filter(Boolean) : ['Level'];
+    const knobs = controls.map((c, ci) => {
+      const inp = document.querySelector(`input[data-pi="${pi}"][data-ci="${ci}"]`);
+      return { name: c, val: inp ? parseInt(inp.value) : 50 };
+    });
+    return { pedalName: p.name, knobs };
+  });
+  const obj = { name: nm, bassName: state.basses[bIdx] ? state.basses[bIdx].name : '', genre: document.getElementById('pr-genre').value.trim(), notes: document.getElementById('pr-notes').value.trim(), settings };
+  if (state.editingPreset !== null) state.presets[state.editingPreset] = obj; else state.presets.push(obj);
+  save(); closeModal('modal-preset'); render();
+}
+function deletePreset() {
+  if (state.editingPreset !== null) { state.presets.splice(state.editingPreset, 1); save(); closeModal('modal-preset'); render(); }
+}
+
+// ---- NOTES ----
+function openNoteModal() { document.getElementById('global-notes').value = state.notes; openModal('modal-note'); }
+function saveNotes() { state.notes = document.getElementById('global-notes').value; save(); closeModal('modal-note'); render(); }
+
+// ---- MODAL ----
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+load();
+</script>
