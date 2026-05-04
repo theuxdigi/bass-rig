@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bass Rig">
+<title>Bass Rig</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;width:100%;}
+:root{
+  --bg:#fff;--bg2:#f7f7f5;--bg3:#efefed;
+  --text:#111;--text2:#666;--text3:#aaa;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
+  --amber:#c07d1a;--amber-bg:#fdf0d8;--amber-text:#6b4010;
+  --teal-bg:#e0f5ee;--teal-text:#0a5a42;
+  --gray-bg:#f0eeea;--gray-text:#444;
+  --coral-bg:#faeae6;--coral-text:#7a2e18;
+  --r:12px;--r-sm:8px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1a18;--bg2:#222220;--bg3:#2a2a28;
+    --text:#f0ede8;--text2:#999;--text3:#666;
+    --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.18);
+    --amber:#f0b840;--amber-bg:#3a2200;--amber-text:#f0b840;
+    --teal-bg:#02302a;--teal-text:#7dd9b8;
+    --gray-bg:#2a2a28;--gray-text:#ccc;
+    --coral-bg:#3a1008;--coral-text:#f0b09a;
+  }
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+  background:var(--bg2);color:var(--text);
+  min-height:100vh;min-height:-webkit-fill-available;
+  overflow-x:hidden;
+}
+
+/* LAYOUT */
+.app{display:flex;flex-direction:column;min-height:100vh;min-height:-webkit-fill-available;max-width:480px;margin:0 auto;background:var(--bg2);}
+
+/* HEADER */
+.hdr{background:var(--bg);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top,20px) 16px 12px;display:flex;justify-content:space-between;align-items:flex-end;}
+.hdr-title{font-size:22px;font-weight:700;letter-spacing:-.3px;}
+.hdr-sub{font-size:12px;color:var(--text2);margin-top:1px;}
+.badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+.badge-amber{background:var(--amber-bg);color:var(--amber-text);}
+.badge-teal{background:var(--teal-bg);color:var(--teal-text);}
+.badge-gray{background:var(--gray-bg);color:var(--gray-text);}
+
+/* NAV */
+.nav{display:flex;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;}
+.nav-btn{flex:1;padding:12px 4px;font-size:13px;font-weight:500;color:var(--text2);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;}
+.nav-btn.active{color:var(--amber);border-bottom-color:var(--amber);}
+
+/* CONTENT */
+.content{flex:1;padding:14px 14px 100px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+
+/* CARD */
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;}
+.card-hdr{display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+.card-title{font-size:16px;font-weight:600;}
+.card-sub{font-size:13px;color:var(--text2);margin-top:2px;}
+
+/* EXPAND */
+.expand{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.expand.open{display:block;}
+.chevron{color:var(--text3);font-size:14px;transition:transform .2s;flex-shrink:0;margin-left:8px;}
+.chevron.open{transform:rotate(180deg);}
+
+/* SPEC */
+.spec-row{display:flex;justify-content:space-between;font-size:14px;padding:7px 0;border-bottom:1px solid var(--border);}
+.spec-row:last-child{border:none;}
+.spec-label{color:var(--text2);}
+.spec-val{font-weight:500;text-align:right;max-width:60%;}
+
+/* TAG */
+.tag{display:inline-block;background:var(--bg2);color:var(--text2);font-size:12px;padding:3px 9px;border-radius:10px;margin:2px;border:1px solid var(--border);}
+
+/* BTNS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:9px 16px;border-radius:var(--r-sm);border:1px solid var(--border2);background:none;font-size:14px;font-weight:500;cursor:pointer;color:var(--text);font-family:inherit;-webkit-appearance:none;}
+.btn:active{background:var(--bg3);}
+.btn-primary{background:var(--amber);color:#fff;border-color:var(--amber);font-weight:600;}
+.btn-primary:active{opacity:.85;}
+.btn-danger{color:var(--coral-text);border-color:transparent;}
+.btn-danger:active{background:var(--coral-bg);}
+.btn-sm{padding:6px 12px;font-size:13px;}
+
+/* FAB */
+.fab{
+  position:fixed;
+  bottom:calc(24px + env(safe-area-inset-bottom,0px));
+  right:20px;
+  width:58px;height:58px;
+  border-radius:50%;
+  background:var(--amber);color:#fff;
+  border:none;font-size:28px;line-height:1;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+  z-index:999;
+  -webkit-appearance:none;
+}
+
+/* CHAIN */
+.chain-num{font-size:12px;font-weight:600;color:var(--text3);min-width:22px;}
+.chain-arrow{text-align:center;font-size:18px;color:var(--amber);padding:2px 0;}
+
+/* PROG BAR */
+.prog-wrap{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.prog{height:5px;background:var(--amber);border-radius:3px;}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:flex-end;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{
+  background:var(--bg);
+  border-radius:20px 20px 0 0;
+  padding:0 16px calc(24px + env(safe-area-inset-bottom,0px));
+  width:100%;max-width:480px;
+  max-height:90vh;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.modal-handle{width:38px;height:5px;background:var(--border2);border-radius:3px;margin:12px auto 16px;}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:16px;}
+.modal-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+
+/* FORM */
+.fg{margin-bottom:14px;}
+.fg label{font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px;}
+.fg input,.fg select,.fg textarea{
+  width:100%;font-size:16px;color:var(--text);
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:var(--r-sm);padding:11px 13px;
+  -webkit-appearance:none;outline:none;font-family:inherit;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--amber);}
+.fg textarea{min-height:80px;resize:vertical;}
+.fg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px;}
+
+/* RANGE */
+input[type=range]{-webkit-appearance:none;height:5px;background:var(--bg3);border-radius:3px;outline:none;width:100%;border:none;padding:0;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--amber);cursor:pointer;}
+
+/* SECTION LABEL */
+.slabel{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px;}
+
+/* EMPTY */
+.empty{text-align:center;padding:56px 20px;}
+.empty-icon{font-size:44px;margin-bottom:12px;}
+.empty-title{font-size:17px;font-weight:600;margin-bottom:6px;}
+.empty-sub{font-size:14px;color:var(--text2);}
+
+/* DASHED CARD */
+.card-dashed{background:none;border:1px dashed var(--border2);border-radius:var(--r);padding:14px;text-align:center;color:var(--text2);font-size:13px;margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div>
+      <div class="hdr-title">Bass Rig</div>
+      <div class="hdr-sub">Rig documentation</div>
+    </div>
+    <div class="badge badge-amber" id="rig-count">0 basses</div>
+  </div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="switchTab('basses')">Basses</button>
+    <button class="nav-btn" onclick="switchTab('chain')">Chain</button>
+    <button class="nav-btn" onclick="switchTab('presets')">Presets</button>
+    <button class="nav-btn" onclick="switchTab('notes')">Notes</button>
+  </div>
+  <div class="content">
+    <div id="tab-basses"></div>
+    <div id="tab-chain" style="display:none"></div>
+    <div id="tab-presets" style="display:none"></div>
+    <div id="tab-notes" style="display:none"></div>
+  </div>
+</div>
+
+<button class="fab" onclick="fabAction()">+</button>
+
+<!-- BASS MODAL -->
+<div class="overlay" id="modal-bass">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="bass-modal-title">Add bass</div>
+    <div class="fg"><label>Name / model</label><input id="b-name" placeholder="e.g. Fender Jazz Bass"></div>
+    <div class="fg"><label>Brand</label><input id="b-brand" placeholder="Fender, Music Man, Sadowsky..."></div>
+    <div class="fg"><label>Year</label><input id="b-year" type="number" placeholder="e.g. 2019"></div>
+    <div class="fg"><label>Pickups</label><input id="b-pickups" placeholder="e.g. J/J, P/J, Humbucker"></div>
+    <div class="fg"><label>Strings</label><input id="b-strings" placeholder="e.g. D'Addario XL .045–.105"></div>
+    <div class="fg"><label>Tuning</label><input id="b-tuning" placeholder="e.g. Standard EADG, Drop D"></div>
+    <div class="fg"><label>Notes</label><textarea id="b-notes" placeholder="Setup, mods, action, feel..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveBass()">Save</button>
+      <button class="btn" onclick="closeModal('modal-bass')">Cancel</button>
+      <button class="btn btn-danger" id="btn-del-bass" style="display:none" onclick="deleteBass()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- PEDAL MODAL -->
+<div class="overlay" id="modal-pedal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="pedal-modal-title">Add pedal</div>
+    <div class="fg"><label>Pedal name</label><input id="p-name" placeholder="e.g. Darkglass B7K"></div>
+    <div class="fg"><label>Type</label>
+      <select id="p-type">
+        <option>Tuner</option><option>Compressor</option><option>Overdrive</option><option>Fuzz</option>
+        <option>Distortion</option><option>EQ</option><option>Octaver</option><option>Filter / Envelope</option>
+        <option>Chorus</option><option>Flanger</option><option>Phaser</option><option>Delay</option>
+        <option>Reverb</option><option>Preamp / DI</option><option>Loop / Utility</option><option>Other</option>
+      </select>
+    </div>
+    <div class="fg"><label>Brand</label><input id="p-brand" placeholder="Boss, MXR, EHX, Darkglass..."></div>
+    <div class="fg"><label>Controls (comma-separated)</label><input id="p-controls" placeholder="e.g. Volume, Tone, Drive, Mix"></div>
+    <div class="fg"><label>Notes</label><textarea id="p-notes" placeholder="Typical use, bypass type, quirks..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="savePedal()">Save</button>
+      <button class="btn" onclick="closeModal('modal-pedal')">Cancel</button>
+      <button class="btn btn-danger" id="btn-del-pedal" style="display:none" onclick="deletePedal()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRESET MODAL -->
+<div class="overlay" id="modal-preset">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="preset-modal-title">Add preset</div>
+    <div class="fg"><label>Preset name</label><input id="pr-name" placeholder="e.g. Jazz Gig, Recording..."></div>
+    <div class="fg"><label>Bass used</label><select id="pr-bass"></select></div>
+    <div class="fg"><label>Genre / context</label><input id="pr-genre" placeholder="e.g. Jazz, Funk, Rock, Studio"></div>
+    <div id="pr-pedal-settings"></div>
+    <div class="fg"><label>Notes</label><textarea id="pr-notes" placeholder="Tone goals, amp settings, venue notes..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="savePreset()">Save</button>
+      <button class="btn" onclick="closeModal('modal-preset')">Cancel</button>
+      <button class="btn btn-danger" id="btn-del-preset" style="display:none" onclick="deletePreset()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTES MODAL -->
+<div class="overlay" id="modal-note">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Rig notes</div>
+    <div class="fg"><label>Notes</label><textarea id="global-notes" style="min-height:140px;" placeholder="Maintenance log, gig notes, amp settings, shopping list..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveNotes()">Save</button>
+      <button class="btn" onclick="closeModal('modal-note')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var S={basses:[],pedals:[],presets:[],notes:'',eB:null,eP:null,ePr:null};
+var tab='basses';
+
+function load(){try{var d=localStorage.getItem('bassrig3');if(d){var p=JSON.parse(d);S.basses=p.basses||[];S.pedals=p.pedals||[];S.presets=p.presets||[];S.notes=p.notes||'';}}catch(e){}render();}
+function persist(){try{localStorage.setItem('bassrig3',JSON.stringify({basses:S.basses,pedals:S.pedals,presets:S.presets,notes:S.notes}));}catch(e){}}
+
+function switchTab(t){
+  tab=t;
+  ['basses','chain','presets','notes'].forEach(function(n,i){
+    document.getElementById('tab-'+n).style.display=n===t?'':'none';
+    document.querySelectorAll('.nav-btn')[i].classList.toggle('active',n===t);
+  });
+  render();
+}
+
+function fabAction(){
+  if(tab==='basses')openBassModal();
+  else if(tab==='chain')openPedalModal();
+  else if(tab==='presets')openPresetModal();
+  else openNoteModal();
+}
+
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function toggle(id){
+  var el=document.getElementById(id);
+  var ch=document.getElementById('ch-'+id);
+  el.classList.toggle('open');
+  if(ch)ch.classList.toggle('open');
+}
+
+function render(){
+  rBasses();rChain();rPresets();rNotes();
+  document.getElementById('rig-count').textContent=S.basses.length+' bass'+(S.basses.length!==1?'es':'');
+}
+
+/* BASSES */
+function rBasses(){
+  var el=document.getElementById('tab-basses');
+  if(!S.basses.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎸</div><div class="empty-title">No basses yet</div><div class="empty-sub">Tap + to add your first bass</div></div>';return;}
+  el.innerHTML=S.basses.map(function(b,i){
+    return '<div class="card">'+
+      '<div class="card-hdr" onclick="toggle(\'b'+i+'\')">' +
+        '<div><div class="card-title">'+esc(b.name)+'</div><div class="card-sub">'+esc(b.brand||'')+(b.year?' · '+esc(b.year):'')+'</div></div>'+
+        '<span class="chevron" id="ch-b'+i+'">▾</span>'+
+      '</div>'+
+      '<div class="expand" id="b'+i+'">'+
+        (b.pickups?'<div class="spec-row"><span class="spec-label">Pickups</span><span class="spec-val">'+esc(b.pickups)+'</span></div>':'')+
+        (b.strings?'<div class="spec-row"><span class="spec-label">Strings</span><span class="spec-val">'+esc(b.strings)+'</span></div>':'')+
+        (b.tuning?'<div class="spec-row"><span class="spec-label">Tuning</span><span class="spec-val">'+esc(b.tuning)+'</span></div>':'')+
+        (b.notes?'<div style="font-size:13px;color:var(--text2);margin-top:10px;line-height:1.6;">'+esc(b.notes)+'</div>':'')+
+        '<div style="margin-top:12px;"><button class="btn btn-sm" onclick="editBass('+i+')">Edit</button></div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function openBassModal(b,i){
+  S.eB=i!==undefined?i:null;
+  document.getElementById('bass-modal-title').textContent=b?'Edit bass':'Add bass';
+  ['name','brand','year','pickups','strings','tuning','notes'].forEach(function(f){document.getElementById('b-'+f).value=b&&b[f]?b[f]:'';});
+  document.getElementById('btn-del-bass').style.display=b?'':'none';
+  openModal('modal-bass');
+}
+function editBass(i){openBassModal(S.basses[i],i);}
+function saveBass(){
+  var nm=document.getElementById('b-name').value.trim();if(!nm)return;
+  var obj={};['name','brand','year','pickups','strings','tuning','notes'].forEach(function(f){obj[f]=document.getElementById('b-'+f).value.trim();});
+  if(S.eB!==null)S.basses[S.eB]=obj;else S.basses.push(obj);
+  persist();closeModal('modal-bass');render();
+}
+function deleteBass(){if(S.eB!==null){S.basses.splice(S.eB,1);persist();closeModal('modal-bass');render();}}
+
+/* CHAIN */
+var typeColor={Tuner:'badge-gray',Compressor:'badge-teal',Overdrive:'badge-amber',Fuzz:'badge-amber',Distortion:'badge-amber',EQ:'badge-gray',Octaver:'badge-teal','Filter / Envelope':'badge-teal',Chorus:'badge-teal',Flanger:'badge-teal',Phaser:'badge-teal',Delay:'badge-gray',Reverb:'badge-gray','Preamp / DI':'badge-amber','Loop / Utility':'badge-gray',Other:'badge-gray'};
+function rChain(){
+  var el=document.getElementById('tab-chain');
+  if(!S.pedals.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎛️</div><div class="empty-title">No pedals yet</div><div class="empty-sub">Tap + to build your signal chain</div></div>';return;}
+  var html=S.pedals.map(function(p,i){
+    var ctrls=p.controls?p.controls.split(',').map(function(c){return'<span class="tag">'+esc(c.trim())+'</span>';}).join(''):'';
+    var moves='';
+    if(i>0)moves+='<button class="btn btn-sm" onclick="movePedal('+i+',-1)">↑ Up</button> ';
+    if(i<S.pedals.length-1)moves+='<button class="btn btn-sm" onclick="movePedal('+i+',1)">↓ Down</button>';
+    return '<div class="card">'+
+      '<div class="card-hdr" onclick="toggle(\'p'+i+'\')">' +
+        '<div style="display:flex;align-items:center;gap:10px;flex:1;">'+
+          '<span class="chain-num">'+( i+1)+'</span>'+
+          '<div><div class="card-title">'+esc(p.name)+'</div>'+
+          '<div style="margin-top:3px;"><span class="badge '+(typeColor[p.type]||'badge-gray')+'">'+esc(p.type)+'</span>'+(p.brand?'<span style="font-size:12px;color:var(--text3);margin-left:7px;">'+esc(p.brand)+'</span>':'')+'</div></div>'+
+        '</div>'+
+        '<span class="chevron" id="ch-p'+i+'">▾</span>'+
+      '</div>'+
+      '<div class="expand" id="p'+i+'">'+
+        (ctrls?'<div style="margin-bottom:8px;">'+ctrls+'</div>':'')+
+        (p.notes?'<div style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.6;">'+esc(p.notes)+'</div>':'')+
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-sm" onclick="editPedal('+i+')">Edit</button> '+moves+'</div>'+
+      '</div>'+
+    '</div>'+
+    (i<S.pedals.length-1?'<div class="chain-arrow">↓</div>':'');
+  }).join('');
+  html+='<div class="card-dashed">→ Amp / DI out</div>';
+  el.innerHTML=html;
+}
+function openPedalModal(p,i){
+  S.eP=i!==undefined?i:null;
+  document.getElementById('pedal-modal-title').textContent=p?'Edit pedal':'Add pedal';
+  ['name','brand','controls','notes'].forEach(function(f){document.getElementById('p-'+f).value=p&&p[f]?p[f]:'';});
+  document.getElementById('p-type').value=p?p.type:'Tuner';
+  document.getElementById('btn-del-pedal').style.display=p?'':'none';
+  openModal('modal-pedal');
+}
+function editPedal(i){openPedalModal(S.pedals[i],i);}
+function savePedal(){
+  var nm=document.getElementById('p-name').value.trim();if(!nm)return;
+  var obj={name:nm,type:document.getElementById('p-type').value,brand:document.getElementById('p-brand').value.trim(),controls:document.getElementById('p-controls').value.trim(),notes:document.getElementById('p-notes').value.trim()};
+  if(S.eP!==null)S.pedals[S.eP]=obj;else S.pedals.push(obj);
+  persist();closeModal('modal-pedal');render();
+}
+function deletePedal(){if(S.eP!==null){S.pedals.splice(S.eP,1);persist();closeModal('modal-pedal');render();}}
+function movePedal(i,d){var j=i+d;if(j<0||j>=S.pedals.length)return;var t=S.pedals[i];S.pedals[i]=S.pedals[j];S.pedals[j]=t;persist();render();}
+
+/* PRESETS */
+function rPresets(){
+  var el=document.getElementById('tab-presets');
+  if(!S.presets.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎚️</div><div class="empty-title">No presets yet</div><div class="empty-sub">Tap + to save a tone setup</div></div>';return;}
+  el.innerHTML=S.presets.map(function(pr,i){
+    var settings='';
+    if(pr.settings&&pr.settings.length){
+      settings=pr.settings.map(function(s,si){
+        var knobs=s.knobs.map(function(k){
+          return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'+
+            '<span style="font-size:12px;color:var(--text2);min-width:60px;flex-shrink:0;">'+esc(k.name)+'</span>'+
+            '<div class="prog-wrap"><div class="prog" style="width:'+k.val+'%"></div></div>'+
+            '<span style="font-size:12px;font-weight:600;min-width:34px;text-align:right;">'+k.val+'%</span>'+
+          '</div>';
+        }).join('');
+        return '<div style="margin-bottom:12px;"><div style="font-size:14px;font-weight:600;margin-bottom:8px;">'+esc(s.pedalName)+'</div>'+knobs+'</div>'+
+          (si<pr.settings.length-1?'<hr style="border:none;border-top:1px solid var(--border);margin:10px 0;">':'');
+      }).join('');
+    }
+    return '<div class="card">'+
+      '<div class="card-hdr" onclick="toggle(\'pr'+i+'\')">' +
+        '<div><div class="card-title">'+esc(pr.name)+'</div><div class="card-sub">'+esc(pr.bassName||'')+(pr.genre?' · '+esc(pr.genre):'')+'</div></div>'+
+        '<span class="chevron" id="ch-pr'+i+'">▾</span>'+
+      '</div>'+
+      '<div class="expand" id="pr'+i+'">'+
+        settings+
+        (pr.notes?'<div style="font-size:13px;color:var(--text2);margin-top:8px;line-height:1.6;">'+esc(pr.notes)+'</div>':'')+
+        '<div style="margin-top:12px;"><button class="btn btn-sm" onclick="editPreset('+i+')">Edit</button></div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function openPresetModal(pr,i){
+  S.ePr=i!==undefined?i:null;
+  document.getElementById('preset-modal-title').textContent=pr?'Edit preset':'Add preset';
+  document.getElementById('pr-name').value=pr?pr.name:'';
+  document.getElementById('pr-genre').value=pr&&pr.genre?pr.genre:'';
+  document.getElementById('pr-notes').value=pr&&pr.notes?pr.notes:'';
+  var bEl=document.getElementById('pr-bass');
+  bEl.innerHTML=S.basses.length?S.basses.map(function(b,bi){return'<option value="'+bi+'">'+esc(b.name)+'</option>';}).join(''):'<option value="">— add basses first —</option>';
+  if(pr){var idx=S.basses.findIndex(function(b){return b.name===pr.bassName;});if(idx>=0)bEl.value=idx;}
+  buildKnobs(pr);
+  document.getElementById('btn-del-preset').style.display=pr?'':'none';
+  openModal('modal-preset');
+}
+function buildKnobs(pr){
+  var wrap=document.getElementById('pr-pedal-settings');
+  if(!S.pedals.length){wrap.innerHTML='<div style="font-size:13px;color:var(--text2);margin-bottom:12px;">Add pedals in the Chain tab first.</div>';return;}
+  wrap.innerHTML='<div class="slabel">Pedal settings</div>'+S.pedals.map(function(p,pi){
+    var ex=pr&&pr.settings?pr.settings.find(function(s){return s.pedalName===p.name;}):null;
+    var ctrls=p.controls?p.controls.split(',').map(function(c){return c.trim();}).filter(Boolean):['Level'];
+    return '<div class="card" style="margin-bottom:8px;">'+
+      '<div style="font-size:14px;font-weight:600;margin-bottom:10px;">'+esc(p.name)+'</div>'+
+      ctrls.map(function(c,ci){
+        var k=ex&&ex.knobs?ex.knobs.find(function(k){return k.name===c;}):null;
+        var val=k?k.val:50;
+        return '<div style="margin-bottom:10px;">'+
+          '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:5px;">'+
+            '<span>'+esc(c)+'</span><span id="kv'+pi+'-'+ci+'">'+val+'%</span>'+
+          '</div>'+
+          '<input type="range" min="0" max="100" step="1" value="'+val+'" data-pi="'+pi+'" data-ci="'+ci+'" oninput="document.getElementById(\'kv'+pi+'-'+ci+'\').textContent=this.value+\'%\'">'+
+        '</div>';
+      }).join('')+
+    '</div>';
+  }).join('');
+}
+function editPreset(i){openPresetModal(S.presets[i],i);}
+function savePreset(){
+  var nm=document.getElementById('pr-name').value.trim();if(!nm)return;
+  var bIdx=parseInt(document.getElementById('pr-bass').value)||0;
+  var settings=S.pedals.map(function(p,pi){
+    var ctrls=p.controls?p.controls.split(',').map(function(c){return c.trim();}).filter(Boolean):['Level'];
+    var knobs=ctrls.map(function(c,ci){
+      var inp=document.querySelector('input[data-pi="'+pi+'"][data-ci="'+ci+'"]');
+      return{name:c,val:inp?parseInt(inp.value):50};
+    });
+    return{pedalName:p.name,knobs:knobs};
+  });
+  var obj={name:nm,bassName:S.basses[bIdx]?S.basses[bIdx].name:'',genre:document.getElementById('pr-genre').value.trim(),notes:document.getElementById('pr-notes').value.trim(),settings:settings};
+  if(S.ePr!==null)S.presets[S.ePr]=obj;else S.presets.push(obj);
+  persist();closeModal('modal-preset');render();
+}
+function deletePreset(){if(S.ePr!==null){S.presets.splice(S.ePr,1);persist();closeModal('modal-preset');render();}}
+
+/* NOTES */
+function rNotes(){
+  var el=document.getElementById('tab-notes');
+  el.innerHTML='<div class="card">'+
+    '<div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:10px;">General rig notes</div>'+
+    (S.notes?'<div style="font-size:14px;white-space:pre-wrap;line-height:1.6;">'+esc(S.notes)+'</div>':'<div style="font-size:14px;color:var(--text2);">No notes yet.</div>')+
+    '<div style="margin-top:14px;"><button class="btn btn-sm" onclick="openNoteModal()">Edit notes</button></div>'+
+  '</div>';
+}
+function openNoteModal(){document.getElementById('global-notes').value=S.notes;openModal('modal-note');}
+function saveNotes(){S.notes=document.getElementById('global-notes').value;persist();closeModal('modal-note');render();}
+
+/* MODAL */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(function(m){m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});});
+
+load();
+</script>
+</body>
+</html>
